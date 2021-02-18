@@ -6,7 +6,7 @@
 /*   By: rgarcia- <rgarcia-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/16 13:51:32 by rgarcia-          #+#    #+#             */
-/*   Updated: 2021/02/16 14:01:38 by rgarcia-         ###   ########.fr       */
+/*   Updated: 2021/02/18 13:26:34 by rgarcia-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,24 +16,24 @@
 
 typedef struct	s_zona
 {
-	int			width;
-	int			height;
-	char		fondo;
+	int		width;
+	int		height;
+	char	fondo;
 }				t_zona;
 
 typedef struct	s_forma
 {
-	char		tipo;
-	float		x;
-	float		y;
-	float		width;
-	float		height;
-	char		color;
+	char	tipo;
+	float	x;
+	float	y;
+	float	width;
+	float	height;
+	char	color;
 }				t_forma;
 
 int		ft_strlen(char *str)
 {
-	int i = 0;
+	int	i = 0;
 
 	while (str[i] != '\0')
 		i++;
@@ -51,13 +51,13 @@ int		ft_error(FILE *file, char *dibujo, char *error)
 	return (1);
 }
 
-void	ft_draw(char *dibujo, t_zona *zona)
+void	ft_draw(char *dibujo, t_zona zona)
 {
 	int	i = 0;
 
-	while (i < zona->height)
+	while (i < zona.height)
 	{
-		write(1, dibujo + (i * zona->width), zona->width);
+		write(1, dibujo + (i * zona.width), zona.width);
 		write(1, "\n", 1);
 		i++;
 	}
@@ -68,10 +68,9 @@ char	*get_zona(FILE *file, t_zona *zona)
 	int		i = 0;
 	char	*dibujo;
 
-	if ((fscanf(file, "%d %d %c\n", &zona->width, &zona->height, &zona->fondo)) != 3)
+	if (fscanf(file, "%d %d %c\n", &zona->width, &zona->height, &zona->fondo) != 3)
 		return (0);
-	if (zona->width <= 0 || zona->width > 300 || zona->height <= 0 ||
-	zona->height > 300)
+	if (zona->width <= 0 || zona->width > 300 || zona->height <= 0 || zona->height > 300)
 		return (0);
 	if (!(dibujo = (char *)malloc(sizeof(*dibujo) * (zona->width * zona->height))))
 		return (0);
@@ -80,37 +79,36 @@ char	*get_zona(FILE *file, t_zona *zona)
 	return (dibujo);
 }
 
-int		in_rectangle(float x, float y, t_forma *forma)
+int		in_rectangle(float x, float y, t_forma forma)
 {
-	if (x < forma->x || forma->x + forma->width < x ||
-	y < forma->y || forma->y + forma->height < y)
+	if (x < forma.x || forma.x + forma.width < x ||
+	y < forma.y || forma.y + forma.height < y)
 		return (0);
-	if (x - forma->x < 1 || forma->x + forma->width - x < 1 ||
-	y - forma->y < 1 || forma->y + forma->height - y < 1)
+	if (x - forma.x < 1 || forma.x + forma.width - x < 1 ||
+	y - forma.y < 1 || forma.y + forma.height - y < 1)
 		return (2);
 	return (1);
 }
 
-int		get_forma(FILE *file, char **dibujo, t_zona *zona)
+int		get_forma(FILE *file, char **dibujo, t_zona zona)
 {
 	int		x = 0, y = 0, ret, ret_scan;
-	t_forma	*forma;
+	t_forma	forma;
 
-	while ((ret_scan = fscanf(file, "%c %f %f %f %f %c\n", &forma->tipo, &forma->x,
-	&forma->y, &forma->width, &forma->height, &forma->color)) == 6)
+	while ((ret_scan = fscanf(file, "%c %f %f %f %f %c\n", &forma.tipo, &forma.x, &forma.y, &forma.width,
+	&forma.height, &forma.color)) == 6)
 	{
-		if (forma->width <= 0 || forma->height <= 0 ||
-		(forma->tipo != 'r' && forma->tipo != 'R'))
+		if (forma.width <= 0 || forma.height <= 0 || (forma.tipo != 'r' && forma.tipo != 'R'))
 			return (0);
 		x = 0;
-		while (x < zona->height)
+		while (x < zona.height)
 		{
 			y = 0;
-			while (y < zona->width)
+			while (y < zona.width)
 			{
 				ret = in_rectangle(y, x, forma);
-				if ((forma->tipo == 'r' && ret == 2) || (forma->tipo == 'R' && ret))
-					(*dibujo)[x * zona->width + y] = forma->color;
+				if ((forma.tipo == 'r' && ret == 2) || (forma.tipo == 'R' && ret))
+					(*dibujo)[x * zona.width + y] = forma.color;
 				y++;
 			}
 			x++;
@@ -124,14 +122,14 @@ int		get_forma(FILE *file, char **dibujo, t_zona *zona)
 int		main(int argc, char **argv)
 {
 	FILE	*file;
-	t_zona	*zona;
 	char	*dibujo;
+	t_zona	zona;
 
 	if (argc != 2)
 		return (ft_error(NULL, NULL, "Error: argument\n"));
 	if (!(file = fopen(argv[1], "r")))
 		return (ft_error(NULL, NULL, "Error: Operation file corrupted\n"));
-	if (!(dibujo = get_zona(file, zona)))
+	if (!(dibujo = get_zona(file, &zona)))
 		return (ft_error(file, NULL, "Error: Operation file corrupted\n"));
 	if (!(get_forma(file, &dibujo, zona)))
 		return (ft_error(file, NULL, "Error: Operation file corrupted\n"));
